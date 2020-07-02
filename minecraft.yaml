@@ -1,0 +1,19 @@
+---
+# Setup LAMP Stack
+- hosts: localhost
+  become: no
+  gather_facts: no
+
+
+  #vars_prompt:
+  #  - name: "minecraft_url"
+  #    prompt: "Minecraft download url"
+  #    private: no
+  #    confirm: no
+
+
+  roles:
+   - minecraft
+
+
+      

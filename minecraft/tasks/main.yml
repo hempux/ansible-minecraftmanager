@@ -1,0 +1,56 @@
+---
+# tasks file for minecraft
+
+- name: stat ~/minecraft
+  stat:
+    path: "~/minecraft/"
+  register: minecraftstate
+
+- name: ladda ner minecraft
+  get_url:
+      dest: /tmp/minecraft.zip
+      url: "{{ minecraft_url }}"
+
+- name: stoppa minecraft
+  service:
+    name: minecraft
+    state: stopped
+
+- name: ta bort minecraftbackup
+  file:
+    path: ~/minecraft.bak
+    state: absent
+
+- name: flytta minecraftmappen
+  shell: mv ~/minecraft ~/minecraft.bak
+  when: minecraftstate.stat.exists == true
+
+- name: skapa minecraftkatalogen
+  file:
+    path: ~/minecraft
+    state: directory
+
+- name: zippa upp minecraft
+  unarchive:
+      src: /tmp/minecraft.zip
+      dest: ~/minecraft 
+      remote_src: yes
+
+- name: kopiera filer
+  copy:
+      dest: "~/minecraft/"
+      src: "~/minecraft.bak/{{ item }}" 
+      remote_src: yes
+  loop:
+    - worlds
+    - server.properties
+    - whitelist.json
+    - runmc.sh
+
+- name: döp om backup
+  shell: mv ~/minecraft.bak ~/minecraft-$(date +%x_%H:%M)
+
+- name: starta minecraft
+  service:
+    name: minecraft
+    state: started
